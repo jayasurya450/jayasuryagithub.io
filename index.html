@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Gamer Paradise</title>
+    <title>Zombie Shooter</title>
 
     <style>
         body{
@@ -15,11 +15,12 @@
             background:#111;
         }
 
-        h1{
-            color:white;
+        #score{
             position:absolute;
             top:10px;
             left:10px;
+            color:white;
+            font-size:30px;
             font-family:Arial;
         }
     </style>
@@ -27,7 +28,7 @@
 
 <body>
 
-<h1>🎮 Gamer Paradise</h1>
+<div id="score">Score: 0</div>
 
 <canvas id="game"></canvas>
 
@@ -39,14 +40,18 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let player = {
-    x:100,
-    y:100,
-    size:50,
-    color:"lime",
-    speed:5
+let score = 0;
+
+const player = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    size: 40,
+    color: "lime",
+    speed: 5
 };
 
+let bullets = [];
+let zombies = [];
 let keys = {};
 
 document.addEventListener("keydown", (e)=>{
@@ -57,12 +62,14 @@ document.addEventListener("keyup", (e)=>{
     keys[e.key] = false;
 });
 
+document.addEventListener("click", shoot);
+
 function movePlayer(){
 
-    if(keys["ArrowUp"]) player.y -= player.speed;
-    if(keys["ArrowDown"]) player.y += player.speed;
-    if(keys["ArrowLeft"]) player.x -= player.speed;
-    if(keys["ArrowRight"]) player.x += player.speed;
+    if(keys["w"]) player.y -= player.speed;
+    if(keys["s"]) player.y += player.speed;
+    if(keys["a"]) player.x -= player.speed;
+    if(keys["d"]) player.x += player.speed;
 
 }
 
@@ -71,15 +78,97 @@ function drawPlayer(){
     ctx.fillRect(player.x, player.y, player.size, player.size);
 }
 
+function shoot(e){
+
+    bullets.push({
+        x: player.x + player.size/2,
+        y: player.y + player.size/2,
+        dx: (e.clientX - player.x)/20,
+        dy: (e.clientY - player.y)/20,
+        size:10
+    });
+
+}
+
+function drawBullets(){
+
+    ctx.fillStyle = "yellow";
+
+    bullets.forEach((bullet, index)=>{
+
+        bullet.x += bullet.dx;
+        bullet.y += bullet.dy;
+
+        ctx.beginPath();
+        ctx.arc(bullet.x, bullet.y, bullet.size, 0, Math.PI*2);
+        ctx.fill();
+
+    });
+
+}
+
+function spawnZombie(){
+
+    zombies.push({
+        x: Math.random() * canvas.width,
+        y: 0,
+        size:40,
+        color:"red",
+        speed:1
+    });
+
+}
+
+function drawZombies(){
+
+    zombies.forEach((zombie, zIndex)=>{
+
+        let angle = Math.atan2(player.y - zombie.y, player.x - zombie.x);
+
+        zombie.x += Math.cos(angle) * zombie.speed;
+        zombie.y += Math.sin(angle) * zombie.speed;
+
+        ctx.fillStyle = zombie.color;
+        ctx.fillRect(zombie.x, zombie.y, zombie.size, zombie.size);
+
+        bullets.forEach((bullet, bIndex)=>{
+
+            let dist = Math.hypot(bullet.x - zombie.x, bullet.y - zombie.y);
+
+            if(dist < zombie.size){
+
+                zombies.splice(zIndex,1);
+                bullets.splice(bIndex,1);
+
+                score++;
+
+                document.getElementById("score").innerText = "Score: " + score;
+
+            }
+
+        });
+
+    });
+
+}
+
 function gameLoop(){
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
     movePlayer();
+
     drawPlayer();
 
+    drawBullets();
+
+    drawZombies();
+
     requestAnimationFrame(gameLoop);
+
 }
+
+setInterval(spawnZombie, 1000);
 
 gameLoop();
 
