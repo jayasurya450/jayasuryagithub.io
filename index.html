@@ -6,101 +6,84 @@
     <style>
         body{
             margin:0;
-            font-family:Arial;
-            background:#111;
-            color:white;
-            text-align:center;
-        }
-
-        header{
-            background:#ff0000;
-            padding:20px;
-            font-size:35px;
-            font-weight:bold;
-        }
-
-        nav{
-            background:#222;
-            padding:15px;
-        }
-
-        nav a{
-            color:white;
-            text-decoration:none;
-            margin:20px;
-            font-size:20px;
-        }
-
-        .hero{
-            padding:100px 20px;
-            background:url('https://images.unsplash.com/photo-1542751371-adc38448a05e');
-            background-size:cover;
-        }
-
-        .hero h1{
-            font-size:60px;
-        }
-
-        .games{
-            padding:40px;
-        }
-
-        .card{
-            background:#222;
-            margin:20px auto;
-            padding:20px;
-            width:300px;
-            border-radius:15px;
-        }
-
-        footer{
+            overflow:hidden;
             background:black;
-            padding:20px;
-            margin-top:20px;
+        }
+
+        canvas{
+            display:block;
+            background:#111;
+        }
+
+        h1{
+            color:white;
+            position:absolute;
+            top:10px;
+            left:10px;
+            font-family:Arial;
         }
     </style>
 </head>
 
 <body>
 
-<header>
-    Gamer Paradise
-</header>
+<h1>🎮 Gamer Paradise</h1>
 
-<nav>
-    <a href="#">Home</a>
-    <a href="#">Games</a>
-    <a href="#">Esports</a>
-    <a href="#">Contact</a>
-</nav>
+<canvas id="game"></canvas>
 
-<section class="hero">
-    <h1>Welcome Gamers!</h1>
-    <p>Explore the world of gaming</p>
-</section>
+<script>
 
-<section class="games">
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-    <div class="card">
-        <h2>BGMI</h2>
-        <p>Battle royale action game.</p>
-    </div>
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-    <div class="card">
-        <h2>Valorant</h2>
-        <p>Popular FPS esports game.</p>
-    </div>
+let player = {
+    x:100,
+    y:100,
+    size:50,
+    color:"lime",
+    speed:5
+};
 
-    <div class="card">
-        <h2>Minecraft</h2>
-        <p>Creative sandbox adventure.</p>
-    </div>
+let keys = {};
 
-</section>
+document.addEventListener("keydown", (e)=>{
+    keys[e.key] = true;
+});
 
-<footer>
-    © 2026 Gamer Paradise
-</footer>
+document.addEventListener("keyup", (e)=>{
+    keys[e.key] = false;
+});
+
+function movePlayer(){
+
+    if(keys["ArrowUp"]) player.y -= player.speed;
+    if(keys["ArrowDown"]) player.y += player.speed;
+    if(keys["ArrowLeft"]) player.x -= player.speed;
+    if(keys["ArrowRight"]) player.x += player.speed;
+
+}
+
+function drawPlayer(){
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.size, player.size);
+}
+
+function gameLoop(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    movePlayer();
+    drawPlayer();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+</script>
 
 </body>
 </html>
